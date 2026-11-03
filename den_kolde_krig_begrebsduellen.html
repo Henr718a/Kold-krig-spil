@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="da" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEN KOLDE KRIG – BEGREBSDUELLEN</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Share Tech Mono & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        coldNavy: '#0d1b2a',
+                        coldNavyLight: '#1b263b',
+                        sovietRed: '#7f1d1d',
+                        sovietRedDark: '#450a0a',
+                        radarGreen: '#10b981',
+                        paperBg: '#f8fafc',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* CSS 3D Card Flip styles */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        .backface-hidden {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .rotate-y-180 {
+            transform: rotateY(180deg);
+        }
+
+        /* Radar scan effect on Navy cards */
+        .radar-sweep {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, transparent 0deg 300deg, rgba(16, 185, 129, 0.4) 360deg);
+            animation: spin 4s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Barbed wire pattern simulation */
+        .barbed-wire-bg {
+            background-image: repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 10px, transparent 0, transparent 20px);
+        }
+
+        /* Custom glow effects for card matching */
+        .glow-green {
+            box-shadow: 0 0 20px 4px rgba(34, 197, 94, 0.9), 0 0 10px 2px rgba(34, 197, 94, 0.5);
+        }
+        .glow-red {
+            box-shadow: 0 0 20px 4px rgba(239, 68, 68, 0.9), 0 0 10px 2px rgba(239, 68, 68, 0.5);
+        }
+
+        /* Classified Document Stamp effect */
+        .stamp {
+            transform: rotate(-8deg);
+            border: 3px solid #7f1d1d;
+            color: #7f1d1d;
+            mask-image: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8));
+        }
+
+        /* Zoom card animation on own side */
+        .side-zoom-in {
+            animation: sideZoom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes sideZoom {
+            from { transform: scale(0.6); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Improved Nuclear Explosion Animations */
+        @keyframes screenShake {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            10%, 30%, 50%, 70%, 90% { transform: translate(-6px, 4px) rotate(-1deg); }
+            20%, 40%, 60%, 80% { transform: translate(6px, -4px) rotate(1deg); }
+        }
+        .shake-screen {
+            animation: screenShake 0.6s ease-in-out;
+        }
+
+        @keyframes nukeFlash {
+            0% { opacity: 0; }
+            10% { opacity: 0.95; }
+            30% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+        .nuke-flash-anim {
+            animation: nukeFlash 1.2s ease-out forwards;
+        }
+
+        @keyframes shockwaveExpand {
+            0% { transform: scale(0.1); opacity: 1; stroke-width: 8; }
+            100% { transform: scale(2.8); opacity: 0; stroke-width: 1; }
+        }
+        .shockwave-anim {
+            animation: shockwaveExpand 1.8s ease-out forwards;
+        }
+
+        @keyframes fireballGrow {
+            0% { transform: scale(0.2) translateY(50px); filter: brightness(2) opacity(0); }
+            15% { opacity: 1; filter: brightness(2.5); }
+            40% { transform: scale(1.1) translateY(-10px); filter: brightness(1.5); }
+            100% { transform: scale(1.4) translateY(-30px); opacity: 0; filter: brightness(0.8); }
+        }
+        .fireball-anim {
+            animation: fireballGrow 3.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes smokeRingExpand {
+            0% { transform: scale(0.3) translateY(30px) rotate(0deg); opacity: 0; }
+            30% { opacity: 0.8; }
+            100% { transform: scale(1.6) translateY(-60px) rotate(15deg); opacity: 0; }
+        }
+        .smoke-ring-anim {
+            animation: smokeRingExpand 3.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body id="game-body" class="bg-slate-950 text-slate-100 font-sans h-screen w-screen flex flex-col justify-between selection:bg-red-900 selection:text-white select-none overflow-hidden">
+    
+    <!-- TOP BAR: TITLE & SCORES (COMPACT FULL WIDTH) -->
+    <header class="bg-slate-900/90 border-b border-slate-800 px-3 py-1.5 flex-shrink-0 w-full z-10 shadow-lg">
+        <div class="w-full flex flex-row items-center justify-between gap-2">
+            
+            <!-- GAME TITLE -->
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <div class="w-3 h-3 rounded-full bg-red-600 animate-pulse"></div>
+                <div>
+                    <h1 class="font-mono text-xs sm:text-sm md:text-base font-black tracking-wider text-slate-100">
+                        DEN KOLDE KRIG <span class="text-red-500 font-normal">| BEGREBSDUELLEN</span>
+                    </h1>
+                    <p class="text-[9px] text-slate-400 font-mono hidden sm:block">12 BEGREBER (VENSTRE) &bull; 12 FORKLARINGER (HØJRE)</p>
+                </div>
+            </div>
+
+            <!-- SCOREBOARD & TURN STATUS -->
+            <div class="flex items-center gap-2 sm:gap-6 flex-grow justify-end">
+                
+                <!-- PLAYER 1 CARD -->
+                <div id="player1-card" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 flex items-center gap-2 transition-all duration-300 min-w-[110px]">
+                    <div class="w-5 h-5 rounded-full bg-blue-900/80 border border-blue-400 flex items-center justify-center text-blue-300 font-bold font-mono text-[10px] flex-shrink-0">1</div>
+                    <div class="truncate">
+                        <div id="p1-name-display" class="font-bold text-xs text-slate-200 truncate">Spiller 1</div>
+                        <div class="text-[8px] text-blue-400 font-mono font-semibold">NATO</div>
+                    </div>
+                    <div class="ml-auto text-right pl-1">
+                        <span id="p1-score" class="font-mono text-base font-black text-blue-400">0</span>
+                    </div>
+                </div>
+
+                <!-- TURN & PROGRESS INFO -->
+                <div class="bg-slate-950/80 border border-slate-800 rounded-lg px-3 py-1 text-center flex flex-col justify-center items-center shadow hidden sm:flex">
+                    <div class="text-[9px] text-slate-400 font-mono tracking-widest uppercase">AKTIV TUR</div>
+                    <div id="active-player-display" class="font-mono text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1">
+                        <span class="inline-block w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+                        <span id="current-player-name" class="truncate max-w-[90px]">Spiller 1</span>
+                    </div>
+                </div>
+
+                <!-- PLAYER 2 CARD -->
+                <div id="player2-card" class="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 flex items-center gap-2 transition-all duration-300 min-w-[110px]">
+                    <div class="w-5 h-5 rounded-full bg-red-900/80 border border-red-400 flex items-center justify-center text-red-300 font-bold font-mono text-[10px] flex-shrink-0">2</div>
+                    <div class="truncate">
+                        <div id="p2-name-display" class="font-bold text-xs text-slate-200 truncate">Spiller 2</div>
+                        <div class="text-[8px] text-red-400 font-mono font-semibold">WARSZAWA</div>
+                    </div>
+                    <div class="ml-auto text-right pl-1">
+                        <span id="p2-score" class="font-mono text-base font-black text-red-400">0</span>
+                    </div>
+                </div>
+
+                <!-- PAIRS FOUND COUNTER -->
+                <div class="text-right font-mono text-xs pl-1">
+                    <span class="text-[9px] text-slate-400 block">PAR</span>
+                    <span id="pairs-found" class="text-emerald-400 font-black">0</span>/12
+                </div>
+
+            </div>
+
+        </div>
+    </header>
+
+    <!-- MAIN GAME BOARD (FULLSCREEN SPLIT NO SCROLL) -->
+    <main class="w-full h-full px-2 py-2 flex-grow flex items-stretch justify-center overflow-hidden relative">
+        
+        <div class="grid grid-cols-2 gap-2 sm:gap-4 w-full h-full items-stretch relative">
+            
+            <!-- LEFT SECTION: BEGREBER (12 CARDS) -->
+            <div class="bg-slate-900/80 border border-blue-900/50 rounded-xl p-2 flex flex-col shadow-2xl h-full w-full overflow-hidden relative">
+                <div class="flex items-center justify-between border-b border-blue-900/40 pb-1 mb-1.5 flex-shrink-0">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span>
+                        <h2 class="font-mono text-xs font-bold text-blue-300 tracking-wider uppercase">VENSTRE: BEGREBER (12 KORT)</h2>
+                    </div>
+                </div>
+                
+                <div id="concepts-grid" class="grid grid-cols-3 grid-rows-4 gap-1.5 sm:gap-2 w-full h-full relative">
+                    <!-- Javascript injected concept cards -->
+                </div>
+
+                <!-- LEFT SIDE ZOOM OVERLAY -->
+                <div id="left-side-zoom" class="absolute inset-x-2 top-8 bottom-2 z-30 pointer-events-none hidden flex flex-col items-center justify-center p-2">
+                    <div id="left-zoom-card" class="side-zoom-in bg-white text-slate-900 border-4 border-blue-600 rounded-2xl w-full h-full max-w-lg p-4 sm:p-6 shadow-2xl flex flex-col justify-between items-center text-center pointer-events-auto">
+                        <div class="px-3 py-1 font-mono text-xs font-bold rounded-full uppercase tracking-widest bg-blue-100 text-blue-800 border border-blue-300">
+                            VALGT BEGREB
+                        </div>
+                        <div id="left-zoom-text" class="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 my-auto px-2">
+                            <!-- Injected Concept Text -->
+                        </div>
+                        <div id="left-zoom-id" class="font-mono text-xs text-slate-400 border-t border-slate-200 pt-2 w-full">
+                            <!-- Brik ID -->
+                        </div>
+                    </div>
+                    <div id="left-click-hint" class="hidden mt-2 font-mono text-[10px] sm:text-xs text-blue-200 bg-slate-900/95 px-3 py-1 rounded-full border border-blue-500 shadow-lg animate-pulse pointer-events-none">
+                        Klik hvor som helst for at fortsætte ▶
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT SECTION: FORKLARINGER (12 CARDS) -->
+            <div class="bg-slate-900/80 border border-red-900/50 rounded-xl p-2 flex flex-col shadow-2xl h-full w-full overflow-hidden relative">
+                <div class="flex items-center justify-between border-b border-red-900/40 pb-1 mb-1.5 flex-shrink-0">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+                        <h2 class="font-mono text-xs font-bold text-red-300 tracking-wider uppercase">HØJRE: FORKLARINGER (12 KORT)</h2>
+                    </div>
+                </div>
+                
+                <div id="explanations-grid" class="grid grid-cols-3 grid-rows-4 gap-1.5 sm:gap-2 w-full h-full relative">
+                    <!-- Javascript injected explanation cards -->
+                </div>
+
+                <!-- RIGHT SIDE ZOOM OVERLAY -->
+                <div id="right-side-zoom" class="absolute inset-x-2 top-8 bottom-2 z-30 pointer-events-none hidden flex flex-col items-center justify-center p-2">
+                    <div id="right-zoom-card" class="side-zoom-in bg-white text-slate-900 border-4 border-red-600 rounded-2xl w-full h-full max-w-lg p-4 sm:p-6 shadow-2xl flex flex-col justify-between items-center text-center pointer-events-auto">
+                        <div class="px-3 py-1 font-mono text-xs font-bold rounded-full uppercase tracking-widest bg-red-100 text-red-800 border border-red-300">
+                            VALGT FORKLARING
+                        </div>
+                        <div id="right-zoom-text" class="text-base sm:text-lg md:text-xl font-bold leading-snug text-slate-900 my-auto px-2">
+                            <!-- Injected Explanation Text -->
+                        </div>
+                        <div id="right-zoom-id" class="font-mono text-xs text-slate-400 border-t border-slate-200 pt-2 w-full">
+                            <!-- Brik ID -->
+                        </div>
+                    </div>
+                    <div id="right-click-hint" class="hidden mt-2 font-mono text-[10px] sm:text-xs text-red-200 bg-slate-900/95 px-3 py-1 rounded-full border border-red-500 shadow-lg animate-pulse pointer-events-none">
+                        Klik hvor som helst for at fortsætte ▶
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-950 border-t border-slate-900 py-1 text-center text-[10px] text-slate-400 font-mono w-full flex-shrink-0">
+        DEN KOLDE KRIG – BEGREBSDUELLEN &bull; HISTORIEUNDERVISNING 9. KLASSE
+    </footer>
+
+    <!-- ENHANCED GRAFISK ATOMBOMBESPRÆNGNING OVERLAY (FORKERT MATCH) -->
+    <div id="nuke-overlay" class="fixed inset-0 z-50 pointer-events-none hidden flex items-center justify-center overflow-hidden">
+        <!-- Bright Blinding Flash -->
+        <div id="nuke-flash" class="absolute inset-0 bg-amber-100 z-10 opacity-0 pointer-events-none"></div>
+
+        <div class="relative flex flex-col items-center justify-center w-full h-full">
+            
+            <!-- Shockwave Rings (SVG) -->
+            <svg class="absolute w-[600px] h-[600px] pointer-events-none" viewBox="0 0 200 200">
+                <circle class="shockwave-anim" cx="100" cy="120" r="40" fill="none" stroke="#f97316" />
+                <circle class="shockwave-anim" cx="100" cy="120" r="40" fill="none" stroke="#ef4444" style="animation-delay: 0.2s;" />
+                <circle class="shockwave-anim" cx="100" cy="120" r="40" fill="none" stroke="#fbbf24" style="animation-delay: 0.4s;" />
+            </svg>
+
+            <!-- Glowing Ground Zero Base -->
+            <div class="absolute bottom-10 w-[500px] h-[120px] bg-orange-600/40 rounded-full blur-2xl animate-pulse"></div>
+
+            <!-- Mushroom Cloud Explosion Container -->
+            <div class="fireball-anim relative flex flex-col items-center justify-center z-20">
+                
+                <!-- Mushroom Cap (Fireball & Cloud Top) -->
+                <div class="relative w-72 h-52 flex items-center justify-center">
+                    <!-- Dark Outer Smoke Layer -->
+                    <div class="absolute inset-0 bg-stone-900/90 rounded-full blur-md transform scale-110 shadow-2xl"></div>
+                    <!-- Fire Gradient Core -->
+                    <div class="absolute inset-2 bg-gradient-to-t from-red-700 via-orange-500 to-yellow-300 rounded-full blur-sm flex items-center justify-center shadow-[0_0_80px_rgba(249,115,22,1)]">
+                        <!-- Explosive Warning Text -->
+                        <div class="font-mono text-center font-black text-slate-950 text-3xl tracking-widest drop-shadow-[0_2px_4px_rgba(255,255,255,0.8)] border-y-4 border-slate-950 px-4 py-1 rotate-[-3deg] bg-yellow-400/90">
+                            FORKERT MATCH!
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Turbulent Smoke Rings around Stem -->
+                <div class="smoke-ring-anim absolute -top-4 w-80 h-24 border-8 border-stone-800/80 rounded-[100%] blur-xs"></div>
+                <div class="smoke-ring-anim absolute top-12 w-64 h-16 border-6 border-orange-950/70 rounded-[100%] blur-xs" style="animation-delay: 0.2s;"></div>
+
+                <!-- Stem / Column of Fire & Smoke -->
+                <div class="w-24 h-56 bg-gradient-to-b from-yellow-400 via-orange-600 to-stone-900 rounded-b-3xl blur-xs -mt-10 shadow-[0_0_60px_rgba(234,88,12,0.9)] flex flex-col justify-between items-center">
+                    <div class="w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-300 via-red-600 to-transparent opacity-80 animate-pulse"></div>
+                </div>
+
+                <!-- Dust Cloud Base -->
+                <div class="w-96 h-20 bg-stone-950/90 rounded-full blur-lg -mt-12 border-t-4 border-orange-600/50"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL 1: START / PLAYER NAMES MODAL -->
+    <div id="start-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 z-50 transition-opacity duration-300">
+        <div class="bg-slate-900 border-2 border-slate-700 rounded-2xl max-w-lg w-full p-6 shadow-2xl relative overflow-hidden">
+            <div class="text-center mb-6">
+                <div class="inline-block px-3 py-1 bg-red-950 border border-red-700 rounded-full text-red-400 font-mono text-xs font-bold mb-2">
+                    FORTROLIGT / TOP SECRET
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-mono font-black text-slate-100 tracking-wide">DEN KOLDE KRIG</h2>
+                <p class="text-slate-400 text-sm mt-1">BEGREBSDUELLEN – 2 SPILLERE</p>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block font-mono text-xs text-blue-400 mb-1 uppercase tracking-wider font-bold">Spiller 1 (Vestblokken / NATO)</label>
+                    <input type="text" id="player1-input" value="Spiller 1" maxlength="16" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 font-semibold focus:outline-none focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block font-mono text-xs text-red-400 mb-1 uppercase tracking-wider font-bold">Spiller 2 (Østblokken / Warszawapagten)</label>
+                    <input type="text" id="player2-input" value="Spiller 2" maxlength="16" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 font-semibold focus:outline-none focus:border-red-500">
+                </div>
+            </div>
+
+            <div class="bg-slate-950/60 p-3 rounded-lg border border-slate-800 mb-6 text-xs text-slate-400 space-y-1 font-mono">
+                <p class="text-slate-300 font-bold">SPILLEREGLER:</p>
+                <p>• VENSTRE SIDE: 12 Begreber (Mørkeblå)</p>
+                <p>• HØJRE SIDE: 12 Forklaringer (Dybrøde)</p>
+                <p>• Vend 1 BEGREB og 1 FORKLARING pr. tur.</p>
+                <p>• Begge brikker forstørres op, så teksten er 100% læsbar.</p>
+            </div>
+
+            <button onclick="startGame()" class="w-full py-3.5 bg-red-700 hover:bg-red-600 active:bg-red-800 text-white font-mono font-bold text-lg rounded-xl shadow-lg transition duration-150 tracking-wider flex items-center justify-center gap-2">
+                <span>START DUEL</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL 2: GAME END & INVESTIGATION QUESTION MODAL -->
+    <div id="end-modal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 z-50 hidden transition-opacity duration-300">
+        <div class="bg-slate-900 border-2 border-slate-700 rounded-2xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+            
+            <div class="absolute top-4 right-4 stamp text-xs sm:text-sm font-mono font-bold px-3 py-1 rounded uppercase tracking-wider">
+                DEKLASSIFICERET
+            </div>
+
+            <div class="text-center mb-6">
+                <h2 class="text-2xl sm:text-4xl font-mono font-black text-slate-100 tracking-wide mb-1">MISSION AFSLUTTET</h2>
+                <p class="text-slate-400 text-sm font-mono">ALLE 12 BEGREBSPAR ER FUNDET</p>
+            </div>
+
+            <div id="winner-announcement" class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-center mb-6 shadow-inner">
+                <!-- Injected via JS -->
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div class="bg-slate-950/80 border border-blue-900/50 p-4 rounded-xl text-center">
+                    <div id="end-p1-name" class="font-bold text-slate-300 truncate">Spiller 1</div>
+                    <div id="end-p1-score" class="font-mono text-3xl font-black text-blue-400 mt-1">0</div>
+                    <div class="text-[10px] text-slate-500 font-mono mt-1">POINT</div>
+                </div>
+                <div class="bg-slate-950/80 border border-red-900/50 p-4 rounded-xl text-center">
+                    <div id="end-p2-name" class="font-bold text-slate-300 truncate">Spiller 2</div>
+                    <div id="end-p2-score" class="font-mono text-3xl font-black text-red-400 mt-1">0</div>
+                    <div class="text-[10px] text-slate-500 font-mono mt-1">POINT</div>
+                </div>
+            </div>
+
+            <div class="bg-amber-950/30 border-2 border-amber-600/50 rounded-xl p-5 mb-6 text-left relative overflow-hidden">
+                <div class="flex items-center gap-2 mb-2">
+                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <h3 class="font-mono text-xs font-black tracking-widest text-amber-400 uppercase">DAGENS UNDERSØGELSESSPØRGSMÅL</h3>
+                </div>
+                <p class="text-base sm:text-lg font-semibold text-slate-100 mb-3 leading-snug">
+                    Hvorfor blev USA og Sovjetunionen fjender efter 2. verdenskrig?
+                </p>
+                <div class="border-t border-amber-600/30 pt-3 text-xs sm:text-sm text-slate-300 italic">
+                    "Brug jeres viden om kapitalisme, kommunisme og de øvrige fagbegreber, når vi arbejder videre med spørgsmålet i historietimen."
+                </div>
+            </div>
+
+            <button onclick="openStartModal()" class="w-full py-3 bg-slate-800 hover:bg-slate-700 text-slate-100 font-mono font-bold rounded-xl border border-slate-600 transition duration-150 flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                SPIL IGEN
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME LOGIC SCRIPT -->
+    <script>
+        const VOCABULARY_DATA = [
+            { id: 1, concept: "Kommunisme", explanation: "Ideologi, der ønsker et samfund uden sociale klasser, hvor produktionsmidlerne ejes i fællesskab." },
+            { id: 2, concept: "Socialisme", explanation: "Idéer om økonomisk og social lighed og fælles kontrol med samfundets vigtigste produktionsmidler." },
+            { id: 3, concept: "Kapitalisme", explanation: "Økonomisk system, hvor virksomheder og produktionsmidler hovedsageligt ejes privat." },
+            { id: 4, concept: "Kapitalist", explanation: "Person, der ejer kapital, fx fabrikker eller virksomheder, og kan tjene penge på dem." },
+            { id: 5, concept: "Proletar", explanation: "Arbejder, der ikke ejer produktionsmidler, men lever af at sælge sin arbejdskraft." },
+            { id: 6, concept: "Arbejderklasse", explanation: "Samfundsklasse af mennesker, der hovedsageligt lever af lønarbejde." },
+            { id: 7, concept: "Klassekamp", explanation: "Kamp mellem samfundsklasser med forskellige økonomiske interesser." },
+            { id: 8, concept: "Privat ejendomsret", explanation: "Retten til selv at eje ejendom, fx jord, fabrikker eller virksomheder." },
+            { id: 9, concept: "Produktionsmidler", explanation: "De ting, man bruger til at fremstille varer, fx fabrikker, maskiner og jord." },
+            { id: 10, concept: "Revolution", explanation: "En grundlæggende omvæltning af et samfunds politiske eller økonomiske system." },
+            { id: 11, concept: "Demokrati", explanation: "Styreform, hvor borgerne har politisk indflydelse, blandt andet gennem valg." },
+            { id: 12, concept: "Diktatur", explanation: "Styreform, hvor magten er samlet hos én person eller en mindre gruppe." }
+        ];
+
+        const RADAR_SVG = `<svg class="w-6 h-6 text-emerald-500 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9" stroke-opacity="0.4"/><circle cx="12" cy="12" r="6" stroke-opacity="0.6"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="3" x2="12" y2="21" stroke-opacity="0.3"/><line x1="3" y1="12" x2="21" y2="12" stroke-opacity="0.3"/></svg>`;
+        const WALL_BARBED_SVG = `<svg class="w-6 h-6 text-red-400 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12h18M5 9l2 6M11 9l2 6M17 9l2 6"/><rect x="4" y="4" width="16" height="16" rx="2" stroke-dasharray="2 2" stroke-opacity="0.5"/></svg>`;
+
+        let player1Name = "Spiller 1";
+        let player2Name = "Spiller 2";
+        let currentPlayer = 1;
+        let scores = { 1: 0, 2: 0 };
+        let pairsMatched = 0;
+        let selectedConceptCard = null;
+        let selectedExplanationCard = null;
+        let isProcessingTurn = false;
+        let turnResolutionTimeout = null;
+        let nukeEffectTimeout = null;
+        let pendingResolutionCallback = null;
+
+        const startModal = document.getElementById('start-modal');
+        const endModal = document.getElementById('end-modal');
+        const leftSideZoom = document.getElementById('left-side-zoom');
+        const rightSideZoom = document.getElementById('right-side-zoom');
+        const nukeOverlay = document.getElementById('nuke-overlay');
+
+        /**
+         * GLOBAL CLICK TO SKIP WAIT TIME AT ANY POINT
+         */
+        document.addEventListener('click', (e) => {
+            // Undgå at springe over hvis modalerne er åbne
+            if (!startModal.classList.contains('hidden') || !endModal.classList.contains('hidden')) return;
+
+            if (pendingResolutionCallback) {
+                // Afbryd alle igangværende timere
+                if (turnResolutionTimeout) {
+                    clearTimeout(turnResolutionTimeout);
+                    turnResolutionTimeout = null;
+                }
+                if (nukeEffectTimeout) {
+                    clearTimeout(nukeEffectTimeout);
+                    nukeEffectTimeout = null;
+                }
+                const callback = pendingResolutionCallback;
+                pendingResolutionCallback = null;
+                callback();
+            }
+        });
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        function openStartModal() {
+            endModal.classList.add('hidden');
+            startModal.classList.remove('hidden');
+        }
+
+        function startGame() {
+            const p1Input = document.getElementById('player1-input').value.trim();
+            const p2Input = document.getElementById('player2-input').value.trim();
+            player1Name = p1Input || "Spiller 1";
+            player2Name = p2Input || "Spiller 2";
+
+            document.getElementById('p1-name-display').textContent = player1Name;
+            document.getElementById('p2-name-display').textContent = player2Name;
+
+            currentPlayer = 1;
+            scores = { 1: 0, 2: 0 };
+            pairsMatched = 0;
+            selectedConceptCard = null;
+            selectedExplanationCard = null;
+            isProcessingTurn = false;
+
+            updateUIState();
+
+            startModal.classList.add('hidden');
+            endModal.classList.add('hidden');
+            hideSideZooms();
+
+            renderSplitGrids();
+        }
+
+        function renderSplitGrids() {
+            const conceptsGrid = document.getElementById('concepts-grid');
+            const explanationsGrid = document.getElementById('explanations-grid');
+            conceptsGrid.innerHTML = '';
+            explanationsGrid.innerHTML = '';
+
+            let conceptCards = VOCABULARY_DATA.map(item => ({ id: item.id, text: item.concept, type: 'concept' }));
+            let explanationCards = VOCABULARY_DATA.map(item => ({ id: item.id, text: item.explanation, type: 'explanation' }));
+
+            conceptCards = shuffle(conceptCards);
+            explanationCards = shuffle(explanationCards);
+
+            conceptCards.forEach(cardData => {
+                const cardEl = createCardElement(cardData.id, cardData.text, cardData.type);
+                conceptsGrid.appendChild(cardEl);
+            });
+
+            explanationCards.forEach(cardData => {
+                const cardEl = createCardElement(cardData.id, cardData.text, cardData.type);
+                explanationsGrid.appendChild(cardEl);
+            });
+        }
+
+        function updateUIState() {
+            document.getElementById('p1-score').textContent = scores[1];
+            document.getElementById('p2-score').textContent = scores[2];
+            document.getElementById('pairs-found').textContent = pairsMatched;
+
+            const activePlayerName = currentPlayer === 1 ? player1Name : player2Name;
+            document.getElementById('current-player-name').textContent = activePlayerName;
+
+            const p1Card = document.getElementById('player1-card');
+            const p2Card = document.getElementById('player2-card');
+
+            if (currentPlayer === 1) {
+                p1Card.classList.add('border-blue-500', 'bg-blue-950/60', 'shadow-[0_0_15px_rgba(59,130,246,0.4)]');
+                p1Card.classList.remove('border-slate-700');
+                p2Card.classList.remove('border-red-500', 'bg-red-950/60', 'shadow-[0_0_15px_rgba(239,68,68,0.4)]');
+                p2Card.classList.add('border-slate-700');
+            } else {
+                p2Card.classList.add('border-red-500', 'bg-red-950/60', 'shadow-[0_0_15px_rgba(239,68,68,0.4)]');
+                p2Card.classList.remove('border-slate-700');
+                p1Card.classList.remove('border-blue-500', 'bg-blue-950/60', 'shadow-[0_0_15px_rgba(59,130,246,0.4)]');
+                p1Card.classList.add('border-slate-700');
+            }
+        }
+
+        function createCardElement(id, textContent, type) {
+            const card = document.createElement('div');
+            card.className = "perspective-1000 w-full h-full cursor-pointer select-none relative";
+            card.dataset.id = id;
+            card.dataset.type = type;
+            card.dataset.text = textContent;
+
+            const isConcept = type === 'concept';
+            const cardBgColor = isConcept ? 'bg-coldNavy border-blue-800/80' : 'bg-sovietRedDark border-red-800/80';
+            const iconGraphic = isConcept ? RADAR_SVG : WALL_BARBED_SVG;
+            const categoryLabel = isConcept ? 'BEGREB' : 'FORKLARING';
+            const labelColor = isConcept ? 'text-blue-300' : 'text-red-300';
+
+            const textStyleClass = isConcept 
+                ? 'text-[10px] sm:text-xs md:text-sm font-extrabold text-slate-900 leading-tight uppercase' 
+                : 'text-[8px] sm:text-[9px] md:text-[10px] font-semibold text-slate-800 leading-tight';
+
+            card.innerHTML = `
+                <div class="card-inner relative w-full h-full transform-style-3d transition-transform duration-500 rounded-md sm:rounded-lg shadow border ${cardBgColor}">
+                    
+                    <!-- CARD BACK -->
+                    <div class="card-back absolute inset-0 w-full h-full backface-hidden rounded-md p-1 flex flex-col items-center justify-between overflow-hidden barbed-wire-bg">
+                        ${isConcept ? '<div class="radar-sweep pointer-events-none opacity-20"></div>' : ''}
+                        <div class="w-full text-center font-mono text-[8px] tracking-wider ${labelColor} font-bold opacity-70">
+                            ${categoryLabel}
+                        </div>
+                        <div class="my-auto flex flex-col items-center justify-center transform scale-75">
+                            ${iconGraphic}
+                        </div>
+                    </div>
+
+                    <!-- CARD FRONT -->
+                    <div class="card-front absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-slate-100 text-slate-900 rounded-md p-1 flex flex-col justify-between items-center text-center shadow-inner border border-slate-300 overflow-hidden">
+                        <div class="text-[7px] sm:text-[8px] font-mono tracking-widest uppercase font-bold ${isConcept ? 'text-blue-700' : 'text-red-700'} flex-shrink-0">
+                            ${categoryLabel}
+                        </div>
+                        <div class="w-full my-auto flex items-center justify-center px-0.5">
+                            <span class="${textStyleClass} line-clamp-3">${textContent}</span>
+                        </div>
+                        <div class="winner-badge hidden w-full text-[7px] font-mono font-bold text-white py-0.5 rounded-b uppercase"></div>
+                    </div>
+
+                </div>
+            `;
+
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleCardClick(card, id, type, textContent);
+            });
+            return card;
+        }
+
+        function handleCardClick(cardEl, id, type, textContent) {
+            if (isProcessingTurn) return;
+            if (cardEl.classList.contains('matched')) return;
+
+            if (type === 'concept' && selectedConceptCard) return;
+            if (type === 'explanation' && selectedExplanationCard) return;
+
+            flipCard(cardEl, true);
+            showSideZoom(type, textContent, id);
+
+            if (type === 'concept') {
+                selectedConceptCard = { id, element: cardEl, text: textContent };
+            } else {
+                selectedExplanationCard = { id, element: cardEl, text: textContent };
+            }
+
+            if (selectedConceptCard && selectedExplanationCard) {
+                checkMatch();
+            }
+        }
+
+        function showSideZoom(type, textContent, id) {
+            if (type === 'concept') {
+                document.getElementById('left-zoom-text').textContent = textContent;
+                document.getElementById('left-zoom-id').textContent = `Begreb #${id}`;
+                leftSideZoom.classList.remove('hidden');
+            } else {
+                document.getElementById('right-zoom-text').textContent = textContent;
+                document.getElementById('right-zoom-id').textContent = `Forklaring #${id}`;
+                rightSideZoom.classList.remove('hidden');
+            }
+        }
+
+        function hideSideZooms() {
+            leftSideZoom.classList.add('hidden');
+            rightSideZoom.classList.add('hidden');
+            document.getElementById('left-click-hint').classList.add('hidden');
+            document.getElementById('right-click-hint').classList.add('hidden');
+            document.getElementById('left-zoom-card').classList.remove('border-red-600', 'border-green-500', 'glow-red', 'glow-green');
+            document.getElementById('right-zoom-card').classList.remove('border-red-600', 'border-green-500', 'glow-red', 'glow-green');
+        }
+
+        function checkMatch() {
+            isProcessingTurn = true;
+
+            const conceptId = selectedConceptCard.id;
+            const explanationId = selectedExplanationCard.id;
+            const cEl = selectedConceptCard.element;
+            const eEl = selectedExplanationCard.element;
+            const scoringPlayer = currentPlayer;
+
+            const isMatch = conceptId === explanationId;
+
+            document.getElementById('left-click-hint').classList.remove('hidden');
+            document.getElementById('right-click-hint').classList.remove('hidden');
+
+            if (isMatch) {
+                triggerConfetti();
+                cEl.querySelector('.card-inner').classList.add('glow-green');
+                eEl.querySelector('.card-inner').classList.add('glow-green');
+                document.getElementById('left-zoom-card').classList.add('glow-green');
+                document.getElementById('right-zoom-card').classList.add('glow-green');
+
+                const resolveMatch = () => {
+                    hideSideZooms();
+
+                    cEl.classList.add('matched', 'cursor-default');
+                    eEl.classList.add('matched', 'cursor-default');
+
+                    const badgeBg = scoringPlayer === 1 ? 'bg-blue-600' : 'bg-red-600';
+                    const playerLabel = scoringPlayer === 1 ? player1Name : player2Name;
+
+                    [cEl, eEl].forEach(el => {
+                        const badge = el.querySelector('.winner-badge');
+                        badge.classList.remove('hidden');
+                        badge.classList.add(badgeBg);
+                        badge.textContent = `✓ ${playerLabel}`;
+                        el.querySelector('.card-inner').classList.remove('glow-green');
+                        const borderClass = scoringPlayer === 1 ? 'border-blue-500' : 'border-red-500';
+                        el.querySelector('.card-inner').classList.add('border-2', borderClass);
+                    });
+
+                    scores[scoringPlayer]++;
+                    pairsMatched++;
+
+                    updateUIState();
+
+                    selectedConceptCard = null;
+                    selectedExplanationCard = null;
+                    isProcessingTurn = false;
+
+                    if (pairsMatched === 12) {
+                        setTimeout(endGame, 400);
+                    }
+                };
+
+                pendingResolutionCallback = resolveMatch;
+                turnResolutionTimeout = setTimeout(() => {
+                    if (pendingResolutionCallback === resolveMatch) {
+                        pendingResolutionCallback = null;
+                        resolveMatch();
+                    }
+                }, 8000);
+
+            } else {
+                // FORKERT MATCH: Lad begge kort stå forstørrede og fuldt læsbare sammen.
+                // Bombesprængningen udløses først efter 2,5 sekunders læsetid!
+                nukeEffectTimeout = setTimeout(() => {
+                    triggerNukeAnimation();
+                    cEl.querySelector('.card-inner').classList.add('glow-red');
+                    eEl.querySelector('.card-inner').classList.add('glow-red');
+                    document.getElementById('left-zoom-card').classList.add('glow-red');
+                    document.getElementById('right-zoom-card').classList.add('glow-red');
+                }, 2500);
+
+                const resolveMismatch = () => {
+                    if (nukeEffectTimeout) {
+                        clearTimeout(nukeEffectTimeout);
+                        nukeEffectTimeout = null;
+                    }
+                    hideSideZooms();
+
+                    cEl.querySelector('.card-inner').classList.remove('glow-red');
+                    eEl.querySelector('.card-inner').classList.remove('glow-red');
+
+                    flipCard(cEl, false);
+                    flipCard(eEl, false);
+
+                    currentPlayer = currentPlayer === 1 ? 2 : 1;
+                    updateUIState();
+
+                    selectedConceptCard = null;
+                    selectedExplanationCard = null;
+                    isProcessingTurn = false;
+                };
+
+                pendingResolutionCallback = resolveMismatch;
+                turnResolutionTimeout = setTimeout(() => {
+                    if (pendingResolutionCallback === resolveMismatch) {
+                        pendingResolutionCallback = null;
+                        resolveMismatch();
+                    }
+                }, 8000);
+            }
+        }
+
+        function flipCard(cardEl, show) {
+            const inner = cardEl.querySelector('.card-inner');
+            if (show) {
+                inner.classList.add('rotate-y-180');
+            } else {
+                inner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+
+        function triggerNukeAnimation() {
+            const bodyEl = document.getElementById('game-body');
+            const nukeFlash = document.getElementById('nuke-flash');
+            
+            nukeOverlay.classList.remove('hidden');
+            
+            bodyEl.classList.add('shake-screen');
+            nukeFlash.classList.add('nuke-flash-anim');
+
+            setTimeout(() => {
+                bodyEl.classList.remove('shake-screen');
+            }, 600);
+
+            setTimeout(() => {
+                nukeOverlay.classList.add('hidden');
+                nukeFlash.classList.remove('nuke-flash-anim');
+            }, 3800);
+        }
+
+        function endGame() {
+            hideSideZooms();
+            const announcementEl = document.getElementById('winner-announcement');
+            document.getElementById('end-p1-name').textContent = player1Name;
+            document.getElementById('end-p2-name').textContent = player2Name;
+            document.getElementById('end-p1-score').textContent = scores[1];
+            document.getElementById('end-p2-score').textContent = scores[2];
+
+            if (scores[1] > scores[2]) {
+                announcementEl.innerHTML = `
+                    <div class="text-blue-400 font-mono text-xl font-black uppercase tracking-wider">🏆 VINDER: ${player1Name}</div>
+                    <div class="text-xs text-slate-400 font-mono mt-1">NATO-blokken vandt den faglige koldkrigsduel!</div>
+                `;
+            } else if (scores[2] > scores[1]) {
+                announcementEl.innerHTML = `
+                    <div class="text-red-400 font-mono text-xl font-black uppercase tracking-wider">🏆 VINDER: ${player2Name}</div>
+                    <div class="text-xs text-slate-400 font-mono mt-1">Warszawapagten vandt den faglige koldkrigsduel!</div>
+                `;
+            } else {
+                announcementEl.innerHTML = `
+                    <div class="text-amber-400 font-mono text-xl font-black uppercase tracking-wider">🤝 UAFGJORT (6 - 6)</div>
+                    <div class="text-xs text-slate-400 font-mono mt-1">Magtbalancen er opretholdt. Ingen af parterne sejrede alene!</div>
+                `;
+            }
+
+            endModal.classList.remove('hidden');
+        }
+
+        window.onload = function() {
+            openStartModal();
+        };
+    </script>
+</body>
+</html>
